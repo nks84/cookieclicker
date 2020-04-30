@@ -1,0 +1,235 @@
+<html>
+  <head>
+    <title>Javascript</title>        
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+    <style type="text/css">   
+      body {
+        padding: 0 4em;
+        text-align: center;
+      }
+      #spielfeld {
+        display: flex;            
+        height: 60%;
+        width: 70%;
+        border: solid;
+        margin: 0 auto;
+        background-color: aquamarine;
+      }
+
+      #object{
+        align-self: flex-start;
+        width:150px;
+        height:150px;
+        background-color: white;
+        position: relative;
+        top: 0%; 
+        left: 0%; 
+      }
+
+      .square{
+        border-radius: 0%;
+      }
+
+      .circle{
+        border-radius: 50%;
+      }   
+      
+      .white {
+        background-color: white;
+      }
+      
+      .newRecord {
+        font-size: 4em;
+        color: red;
+        border:3px dotted red;
+        border-radius: 4px;
+        opacity: 0;
+        transition: opacity 500ms ease;
+        margin: 18px 0;
+      }
+      
+      .nais {
+        position: absolute;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        font-size: 99px;
+        color: aqua;
+        opacity: 0;
+        transition: opacity 150ms ease-out;
+        pointer-events: none;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .nais.js-show {
+        opacity: .3;
+      }
+      
+      .newRecord.js-show {
+        opacity: 1;
+      }
+        
+    </style>
+  </head>
+    
+  <body> 
+    <div class="nais">
+      <div class="text">
+        NAIS!
+      </div>      
+    </div>
+    <h1>Test Your Reactions</h1> 
+    
+    <button onclick="start()" id="start_btn">Start</button>
+
+    <p>Click on Boxes and Circles as quickly as you can!</p>
+
+    <p>
+      <b>
+        Your time: <span id="timer">0</span>s  ----  Current Best: <span class="best">0</span>s
+      </b>      
+    </p>
+    <div class="newRecord">
+        NEW RECORD! 
+    </div>
+    <div id="spielfeld">        
+      <div id="object">
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      //timing vars
+      var startTime, endTime, timeDiff, recordTime = 99999999999999999;
+      
+      var gameIsRunning = false;
+      
+      var objectjs = document.getElementById("object");
+    
+      //random intervals
+      var rand = 500 + Math.round(Math.random() * 2500);
+      
+      /*  Timer start */
+      function start() {
+        console.log("Game Starts");        
+        
+        if(!gameIsRunning){
+          document.getElementById("start_btn").innerHTML = "Stop";
+          console.log("gameIsRunning = "+ gameIsRunning);
+          console.log("seting new round");
+          startTime = Date.now();
+          //manipulation
+          obeject_shape();
+          random_bg_color();
+          random_position();
+          
+          gameIsRunning = true;          
+        } else {
+          document.getElementById("start_btn").innerHTML = "Start";
+          stopGame();
+        }         
+      };
+      
+      //event
+      objectjs.onclick = function(){
+        //setTimeout("gameon()",rand);
+        if(gameIsRunning){
+          end();         
+        }            
+      }     
+
+      function end() {
+        console.log("Game Ends");
+        gameIsRunning = false;
+        endTime = Date.now();          
+        timeDiff = endTime - startTime; 
+        console.log(timeDiff);
+        document.getElementById("timer").innerHTML = msToSec(timeDiff);
+        //startTime = setDate(Date.now()+rand);
+        console.log("gameIsRunning = "+ gameIsRunning);
+        
+        //see if time is a new low
+        if(timeDiff <= recordTime){
+          recordTime = timeDiff;
+          newRecord();
+        }
+        objectjs.style.background = "transparent";
+        
+        setTimeout(function(){
+          start();
+          rand = 500 + Math.round(Math.random() * 2500);
+        }, rand)
+        
+        document.getElementsByClassName("nais")[0].classList.toggle("js-show");
+        setTimeout(function(){
+          document.getElementsByClassName("nais")[0].classList.toggle("js-show");
+        }, 200);
+      }
+      
+      function newRecord(){
+        console.log("NEW RECORD! "+ recordTime + " units!");
+        document.getElementsByClassName("newRecord")[0].classList.toggle("js-show");        
+        document.getElementsByClassName("best")[0].innerHTML = msToSec(recordTime);
+        
+        setTimeout(function(){
+          document.getElementsByClassName("newRecord")[0].classList.toggle("js-show");
+        }, 2500);
+      }
+      
+      //reset everything!
+      function stopGame() {
+        gameIsRunning = false;
+        recordTime = 999999999999999999999;
+        endTime = 0;
+        startTime = 0;
+        objectjs.style.background = "transparent";
+        //document.getElementsByClassName("best")[0].innerHTML = "0";
+        document.getElementById("timer").innerHTML = "0";
+      }
+    
+      /* manipulation Code */
+      //Form
+      function obeject_shape(){
+        if (Math.random()<=0.5){
+          objectjs.className = "square";
+        } else {
+          objectjs.className = "circle";
+        }
+      }
+
+      //Farbe
+      function random_bg_color() {
+        var x = Math.floor(Math.random() * 256);
+        var y = Math.floor(Math.random() * 256);
+        var z = Math.floor(Math.random() * 256);
+
+        var bgColor = "rgb(" + x + "," + y + "," + z + ")";
+
+        console.log(bgColor);
+
+        objectjs.style.background = bgColor;
+      }
+
+      //Position
+      function random_position() {
+        var p = Math.floor(Math.random()*60);
+        var q = Math.floor(Math.random()*70);
+
+        objectjs.style.top = p + '%';
+        objectjs.style.left = q + '%';
+      }      
+      
+      // butchered a copy&paste from https://stackoverflow.com/questions/19700283/how-to-convert-time-milliseconds-to-hours-min-sec-format-in-javascript
+      function msToSec(duration) {
+        var milliseconds = parseInt((duration % 1000) / 10),
+          seconds = Math.floor((duration / 1000) % 60);
+
+        return seconds + "." + milliseconds;
+      }          
+    </script>
+  </body>
+</html>
